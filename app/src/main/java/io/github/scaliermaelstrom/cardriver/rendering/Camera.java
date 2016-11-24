@@ -7,33 +7,37 @@ import io.github.scaliermaelstrom.cardriver.math.Vector3;
 
 public class Camera {
 
-    private Vector3 position;
-    private float angle;
-
     public float[] perspectiveM = new float[16];
     public float[] orthographicM = new float[16];
+    public Vector2 size;
+    private Vector3 position;
+    private float angle;
 
     public Camera(Vector3 position, float angle, Vector2 windowSize) {
         this.position = position;
         this.angle = angle;
 
         float aspect = windowSize.x / windowSize.y;
-        Matrix.frustumM(perspectiveM, 0, -aspect, aspect, -1, 1, 0.1f, 1000f);
+        Matrix.perspectiveM(perspectiveM, 0, 120, windowSize.x / windowSize.y, 0.1f, 1000f);
         Matrix.orthoM(orthographicM, 0, -aspect, aspect, -1, 1, 0.1f, 1000f);
+
+        size = new Vector2(2 * aspect, 2);
     }
 
     public void adjust(Vector2 windowSize) {
         float aspect = windowSize.x / windowSize.y;
-        Matrix.frustumM(perspectiveM, 0, -aspect, aspect, -1, 1, 0.1f, 1000f);
-        Matrix.orthoM(orthographicM, 0, -aspect, aspect, -1, 1, 0.1f, 1000f);
+        Matrix.perspectiveM(perspectiveM, 0, 120, windowSize.x / windowSize.y, 0.1f, 1000f);
+        Matrix.orthoM(orthographicM, 0, -aspect, aspect, -1, 1, -500, 500);
+
+        size.x = aspect * 2;
     }
 
     public float[] getViewMatrix() {
         float[] viewM = new float[16];
 
         Matrix.setIdentityM(viewM, 0);
-        Matrix.translateM(viewM, 0, -position.x, -position.y, -position.z);
         Matrix.rotateM(viewM, 0, angle, 0, 1, 0);
+        Matrix.translateM(viewM, 0, -position.x, -position.y, -position.z);
 
         return viewM;
     }

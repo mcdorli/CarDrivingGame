@@ -1,22 +1,15 @@
 package io.github.scaliermaelstrom.cardriver.rendering;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import io.github.scaliermaelstrom.cardriver.MainActivity;
 
-import static android.opengl.GLES20.GL_NEAREST;
-import static android.opengl.GLES20.GL_TEXTURE0;
-import static android.opengl.GLES20.GL_TEXTURE_2D;
-import static android.opengl.GLES20.GL_TEXTURE_MAG_FILTER;
-import static android.opengl.GLES20.GL_TEXTURE_MIN_FILTER;
-import static android.opengl.GLES20.glActiveTexture;
-import static android.opengl.GLES20.glBindTexture;
-import static android.opengl.GLES20.glDeleteTextures;
-import static android.opengl.GLES20.glGenTextures;
-import static android.opengl.GLES20.glTexParameteri;
+import static android.opengl.GLES20.*;
 
 public class Texture {
 
@@ -26,30 +19,45 @@ public class Texture {
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inScaled = false;
 
-        Resources resources = MainActivity.context.getResources();
+        InputStream is = MainActivity.context.getResources().openRawResource(resourceId);
+        Bitmap bitmap;
+        try {
+            bitmap = BitmapFactory.decodeStream(is);
+        } finally {
+            try {
+                is.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
 
-        Bitmap bitmap = BitmapFactory.decodeResource(resources, resourceId);
 
         int[] temp = new int[1];
         glGenTextures(1, temp, 0);
         texture = temp[0];
 
         glBindTexture(GL_TEXTURE_2D, texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 
         GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         bitmap.recycle();
     }
 
     public void bind() {
-        glActiveTexture(GL_TEXTURE0);
+        bind(0);
+    }
+
+    public void bind(int index) {
+        glActiveTexture(GL_TEXTURE0 + index);
         glBindTexture(GL_TEXTURE_2D, texture);
     }
 
     public void cleanup() {
-        glDeleteTextures(1, new int[] {texture}, 0);
+        glDeleteTextures(1, new int[]{texture}, 0);
     }
 
 }

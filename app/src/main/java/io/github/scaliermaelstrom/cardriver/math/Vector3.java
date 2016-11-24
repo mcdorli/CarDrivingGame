@@ -19,4 +19,10 @@ public class Vector3 {
                 z + vec.z
         );
     }
+
+    @Override
+    public String toString() {
+        return x + " " + y + " " + z;
+    }
+
 }

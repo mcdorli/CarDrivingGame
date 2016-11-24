@@ -9,4 +9,14 @@ public class Vector2 {
         this.x = x;
         this.y = y;
     }
+
+    public float dot(Vector2 v) {
+        return v.x * x + v.y + y;
+    }
+
+    @Override
+    public String toString() {
+        return x + " " + y;
+    }
+
 }

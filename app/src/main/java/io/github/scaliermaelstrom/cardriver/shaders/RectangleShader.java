@@ -6,15 +6,7 @@ import io.github.scaliermaelstrom.cardriver.rendering.Rectangle;
 import io.github.scaliermaelstrom.cardriver.rendering.Texture;
 import io.github.scaliermaelstrom.cardriver.utils.FileUtil;
 
-import static android.opengl.GLES20.GL_FLOAT;
-import static android.opengl.GLES20.glBindAttribLocation;
-import static android.opengl.GLES20.glEnableVertexAttribArray;
-import static android.opengl.GLES20.glGetAttribLocation;
-import static android.opengl.GLES20.glUniform1i;
-import static android.opengl.GLES20.glUniform2f;
-import static android.opengl.GLES20.glUniform3f;
-import static android.opengl.GLES20.glUniformMatrix4fv;
-import static android.opengl.GLES20.glVertexAttribPointer;
+import static android.opengl.GLES20.*;
 
 public class RectangleShader extends Shader {
 
@@ -23,14 +15,6 @@ public class RectangleShader extends Shader {
 
     public RectangleShader() {
         super(FileUtil.readAsString("rectangle.vert"), FileUtil.readAsString("rectangle.frag"));
-
-        super.bind();
-
-        glEnableVertexAttribArray(vertexAttrib);
-        glVertexAttribPointer(vertexAttrib, 3, GL_FLOAT, false, 0, Rectangle.vertexBuffer);
-
-        glEnableVertexAttribArray(texCoordAttrib);
-        glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, false, 0, Rectangle.textureCoordBuffer);
     }
 
     @Override
@@ -45,10 +29,21 @@ public class RectangleShader extends Shader {
         texCoordAttrib = glGetAttribLocation(program, "texCoord");
     }
 
-    public void bind(Texture texture, float[] model, float[] view, float[] projection, Vector2 size, Vector3 position) {
+    public void bindModel() {
+        super.bind();
+
+        glEnableVertexAttribArray(vertexAttrib);
+        glVertexAttribPointer(vertexAttrib, 3, GL_FLOAT, false, 0, Rectangle.vertexBuffer);
+
+        glEnableVertexAttribArray(texCoordAttrib);
+        glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, false, 0, Rectangle.textureCoordBuffer);
+    }
+
+    public void bind(Texture texture, float[] model, float[] view, float[] projection, Vector2 size, Vector3 position, float angle) {
         texture.bind();
         glUniform1i(getUniformLocation("textureSampler"), 0);
 
+        glUniform1f(getUniformLocation("angle"), (float) Math.toRadians(angle));
         glUniform3f(getUniformLocation("position"), position.x, position.y, position.z);
         glUniform2f(getUniformLocation("size"), size.x, size.y);
         glUniformMatrix4fv(getUniformLocation("model"), 1, false, model, 0);
